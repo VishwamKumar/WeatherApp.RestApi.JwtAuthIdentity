@@ -2,6 +2,6 @@
 
 public class ApplicationUser : IdentityUser
 {
-    //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int AppUserId { get; set; }
 }

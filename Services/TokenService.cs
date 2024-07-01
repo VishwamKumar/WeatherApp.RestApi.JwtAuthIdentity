@@ -28,13 +28,13 @@ public class TokenService()
         {
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, "TokenForTheWeatherApp.RestApi.JwtAuthIdentity"),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Name, user?.UserName??"NA"),
-                new Claim(ClaimTypes.Email, user?.Email??"NA"),
-                new Claim("UserId", user.AppUserId.ToString())
+                new (JwtRegisteredClaimNames.Sub, "TokenForTheWeatherApp.RestApi.JwtAuthIdentity", ClaimValueTypes.String),
+                new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString(), ClaimValueTypes.String),
+                new (JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+                new (ClaimTypes.NameIdentifier, user.Id),
+                new (ClaimTypes.Name, user?.UserName??"NA"),
+                new (ClaimTypes.Email, user?.Email??"NA"),
+                new ("UserId", user!.AppUserId.ToString())
 
             };
             return claims;

@@ -2,7 +2,8 @@
 
 ## Description
 A Weather application with various API Auth implementations.
-This example is JWT AUTH implementation Using Identity 
+This example is JWT AUTH implementation Using ASPNET Core Identity using Entity Framework Core
+It also implements a custom column in database called AppUserId, as Identity Key
 
 # Authors
 

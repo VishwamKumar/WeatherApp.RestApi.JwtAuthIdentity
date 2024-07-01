@@ -5,11 +5,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 builder.Services.AddSingleton(jwtSettings!);
 
-builder.Services.AddDbContext<UsersContext>();
+string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
+// Configure Entity Framework DbContext
+builder.Services.AddDbContext<UsersContext>(options => options.UseSqlServer(connectionString));
+
 builder.Services.AddScoped<TokenService, TokenService>();
 builder.Services.AddControllers();
 
@@ -37,27 +39,32 @@ builder.Services.AddSwaggerGen(option =>
                     Id="Bearer"
                 }
             },
-            new string[]{}
+            new List<string>()
         }
     });
 });
 
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.TokenValidationParameters = new TokenValidationParameters()
-        {
-            ClockSkew = TimeSpan.Zero,
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings?.SecretKey ?? "No_Issuer_Signing_Key")),
-            ValidIssuer = jwtSettings?.Issuer ?? "No_Valid_Issuer",
-            ValidAudience = jwtSettings?.Audience ?? "No_Valid_Audience"
-        };    
-    });
+        ValidateIssuerSigningKey = true,
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings?.SecretKey ?? "No_Issuer_Signing_Key")),
+        ValidIssuer = jwtSettings?.Issuer ?? "No_Valid_Issuer",
+        ValidAudience = jwtSettings?.Audience ?? "No_Valid_Audience"
+    };
+});
 
 builder.Services
     .AddIdentityCore<ApplicationUser>(options =>

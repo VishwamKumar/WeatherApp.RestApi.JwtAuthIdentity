@@ -1,12 +1,8 @@
 namespace WeatherApp.RestApi.JwtAuthIdentity.Services;
 
-public class UsersContext : IdentityUserContext<ApplicationUser>
+public class UsersContext(DbContextOptions<UsersContext> options) : 
+                    IdentityUserContext<ApplicationUser>(options)
 {
-    public UsersContext(DbContextOptions<UsersContext> options)
-        : base(options)
-    {
-    }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -18,5 +14,10 @@ public class UsersContext : IdentityUserContext<ApplicationUser>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        // Configure AppUserId as ignored for inserts
+        modelBuilder.Entity<ApplicationUser>()
+            .Property(u => u.AppUserId)
+            .ValueGeneratedOnAdd()
+            .Metadata.SetBeforeSaveBehavior(PropertySaveBehavior.Ignore);
     }
 }
